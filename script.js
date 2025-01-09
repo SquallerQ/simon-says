@@ -6,9 +6,10 @@ const body = document.querySelector("body");
 
 const gameInformation = {
   round: 1,
-  difficult: 'easy',
-
-}
+  difficult: "easy",
+  currentSequence: "",
+  repeatSequence: true
+};
 
 
 
@@ -18,7 +19,29 @@ function renderPage() {
 }
 renderPage()
 
-function createOutputField() {
+function createNewGameAndRepeatButtons () {
+  const gameOptionBlock = document.createElement("div");
+  gameOptionBlock.classList.add("option");
+  body.append(gameOptionBlock);
+
+
+  const newGameButton = document.createElement("div");
+  newGameButton.classList.add("option__new-game");
+  newGameButton.innerText = 'New Game'
+  gameOptionBlock.append(newGameButton);
+
+  const repeatButton = document.createElement("div");
+  repeatButton.classList.add("option__repeat-sequence");
+  repeatButton.innerText = "Repeat Sequence";
+  gameOptionBlock.append(repeatButton);
+
+
+
+
+};
+createNewGameAndRepeatButtons();
+
+function createOutputField(characterArray, _gameInformation) {
   const divForOutput = document.createElement("div");
   divForOutput.classList.add("output__block");
   body.append(divForOutput);
@@ -26,8 +49,44 @@ function createOutputField() {
   const output = document.createElement("div");
   output.classList.add("output");
   divForOutput.append(output);
+
+  let numberOfCharacters;
+
+  if (_gameInformation.round === 1) {
+    numberOfCharacters = 2;
+  } else if (_gameInformation.round === 2) {
+    numberOfCharacters = 4;
+  } else if (_gameInformation.round === 3) {
+    numberOfCharacters = 6;
+  } else if (_gameInformation.round === 4) {
+    numberOfCharacters = 8;
+  } else if (_gameInformation.round === 5) {
+    numberOfCharacters = 10;
+  } else {
+    return;
+  }
+
+  const sequence = [];
+  for (let i = 0; i < numberOfCharacters; i++) {
+    const randomIndex = Math.floor(Math.random() * characterArray.length);
+    sequence.push(characterArray[randomIndex]);
+  }
+
+  let index = 0;
+  const interval = setInterval(() => {
+    if (index < sequence.length) {
+      output.innerText = sequence[index]; 
+      index++;
+    } else {
+      clearInterval(interval); 
+      setTimeout(() => (output.innerText = ""), 1000);
+    }
+  }, 1000);
+  return gameInformation.currentSequence = sequence;
 }
-createOutputField();
+createOutputField(hardLevelArray, gameInformation);
+
+
 
 
 function createInputField() {
