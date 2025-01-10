@@ -3,6 +3,7 @@ const mediumLevelArray = ["q","w","e","r","t","y","u","i","o","p","a","s","d","f
 const hardLevelArray = [1,2,3,4,5,6,7,8,9,0,"q","w","e","r","t","y","u","i","o","p","a","s","d","f","g","h","j","k","l","z","x","c","v","b","n","m"];
 
 const body = document.querySelector("body");
+let isInputAllowed;
 
 const gameInformation = {
   round: 1,
@@ -13,6 +14,7 @@ const gameInformation = {
 
 
 function startScreen () {
+  isInputAllowed = false;
   body.innerHTML = ''
   changeDifficult(gameInformation);
   createVirtualKeyboard(gameInformation);
@@ -91,6 +93,7 @@ function startGame(_gameInformation) {
 }
 
 function restartGame() {
+  document.removeEventListener("keydown", listenPhysicalKeyboard);
   gameInformation.round = 1;
   gameInformation.currentSequence = "";
   gameInformation.repeatSequence = true;
@@ -99,21 +102,11 @@ function restartGame() {
 
 function repeatSequence () {  
   if (gameInformation.repeatSequence === true) {
-    const output = document.querySelector(".output");
     const input = document.querySelector(".input");
     input.innerHTML = ''
 
     const sequence = gameInformation.currentSequence;
-    let index = 0;
-    const interval = setInterval(() => {
-      if (index < sequence.length) {
-        output.innerText = sequence[index];
-        index++;
-      } else {
-        clearInterval(interval);
-        setTimeout(() => (output.innerText = ""), 1000);
-      }
-    }, 1000);
+    displaySequence(sequence);
   } else {
     return
   }
@@ -122,7 +115,44 @@ function repeatSequence () {
   inputBlock.classList.remove("input__block-error");
   
 }
+function displaySequence(sequence) {
+  const output = document.querySelector(".output");
+  let index = 0;
 
+  disableInput();
+
+  const interval = setInterval(() => {
+    if (index < sequence.length) {
+      output.innerText = sequence[index];
+      index++;
+    } else {
+      clearInterval(interval);
+      setTimeout(() => {
+        output.innerText = "";
+        enableInput();
+      }, 1000);
+    }
+  }, 1000);
+}
+function disableInput() {
+  isInputAllowed = false;
+  toggleVirtualKeyboard(false);
+}
+
+function enableInput() {
+  isInputAllowed = true;
+  toggleVirtualKeyboard(true);
+}
+function toggleVirtualKeyboard(status) {
+  const keys = document.querySelectorAll(".key");
+  keys.forEach((key) => {
+    if (status === true) {
+      key.classList.remove("disabled");
+    } else {
+      key.classList.add("disabled");
+    }
+  });
+}
 function renderPage() {
   body.innerHTML = '';
   renderLevelInformation(gameInformation);
@@ -130,6 +160,9 @@ function renderPage() {
   createOutputField(gameInformation);
   createInputField();
   createVirtualKeyboard(gameInformation);
+  disableInput();
+
+  document.addEventListener("keydown", listenPhysicalKeyboard);
   gameInformation.repeatSequence = true;
   
 }
@@ -244,19 +277,10 @@ function createOutputField(_gameInformation) {
     sequence.push(characterArray[randomIndex]);
   }
 
-  let index = 0;
-  const interval = setInterval(() => {
-    if (index < sequence.length) {
-      output.innerText = sequence[index]; 
-      index++;
-    } else {
-      clearInterval(interval); 
-      setTimeout(() => (output.innerText = ""), 1000);
-    }
-  }, 1000);
   console.log(sequence);
   
-  return gameInformation.currentSequence = sequence;
+  gameInformation.currentSequence = sequence;
+  displaySequence(sequence);
 }
 
 
@@ -288,13 +312,14 @@ function createVirtualKeyboard(_gameInformation) {
   } else if (_gameInformation.difficult === "hard") {
     characterArray = hardLevelArray;
   } else {
-    return
+    return;
   }  
 
   for (let i = 0; i < characterArray.length; i++) {
     const key = document.createElement("div");
     key.classList.add("key");
     key.innerText = characterArray[i];
+    key.setAttribute('data-key', characterArray[i].toString().toLocaleLowerCase())
     divForKeyboard.append(key);
   }
   const keyBoard = document.querySelector(".divForKeyboard");
@@ -302,7 +327,31 @@ function createVirtualKeyboard(_gameInformation) {
     keyBoard.addEventListener("click", listenClick);
   }
 }
+function listenPhysicalKeyboard(event) {
+  if (!isInputAllowed) return;
+  const keyPressed = event.key.toLocaleLowerCase();
+  
+  console.log(keyPressed);
+  let characterArray;
+  if (gameInformation.difficult === "easy") {
+    characterArray = easyLevelArray;
+  } else if (gameInformation.difficult === "medium") {
+    characterArray = mediumLevelArray;
+  } else if (gameInformation.difficult === "hard") {
+    characterArray = hardLevelArray;
+  } else {
+    return;
+  }  
+
+
+  if (characterArray.includes(keyPressed) || characterArray.includes(parseInt(keyPressed))) {
+    const key = document.querySelector(`.key[data-key="${keyPressed}"]`);
+    changeInput(key);
+  }
+}
+
 function listenClick(event) {
+  if (!isInputAllowed) return;
   let clickedButton = event.target;
   if (clickedButton.classList.contains("key")) {
     changeInput(clickedButton);
