@@ -18,7 +18,6 @@ function startScreen () {
   createVirtualKeyboard(gameInformation);
   startGame(gameInformation);
 }
-
 startScreen()
 
 
@@ -91,165 +90,49 @@ function startGame(_gameInformation) {
 
 }
 
+function restartGame() {
+  gameInformation.round = 1;
+  gameInformation.currentSequence = "";
+  gameInformation.repeatSequence = true;
+  startScreen();
+};
 
+function repeatSequence () {  
+  if (gameInformation.repeatSequence === true) {
+    const output = document.querySelector(".output");
+    const input = document.querySelector(".input");
+    input.innerHTML = ''
+
+    const sequence = gameInformation.currentSequence;
+    let index = 0;
+    const interval = setInterval(() => {
+      if (index < sequence.length) {
+        output.innerText = sequence[index];
+        index++;
+      } else {
+        clearInterval(interval);
+        setTimeout(() => (output.innerText = ""), 1000);
+      }
+    }, 1000);
+  } else {
+    return
+  }
+  gameInformation.repeatSequence = false;
+  const inputBlock = document.querySelector(".input__block");
+  inputBlock.classList.remove("input__block-error");
+  
+}
 
 function renderPage() {
   body.innerHTML = '';
   renderLevelInformation(gameInformation);
   createNewGameAndRepeatButtons();
-  createOutputField(hardLevelArray, gameInformation);
+  createOutputField(gameInformation);
   createInputField();
   createVirtualKeyboard(gameInformation);
-
+  gameInformation.repeatSequence = true;
+  
 }
-// renderPage()
-
-function createNewGameAndRepeatButtons () {
-  const gameOptionBlock = document.createElement("div");
-  gameOptionBlock.classList.add("option");
-  body.append(gameOptionBlock);
-
-
-  const newGameButton = document.createElement("div");
-  newGameButton.classList.add("option__new-game");
-  newGameButton.innerText = 'New Game'
-  gameOptionBlock.append(newGameButton);
-
-  const repeatButton = document.createElement("div");
-  repeatButton.classList.add("option__repeat-sequence");
-  repeatButton.innerText = "Repeat Sequence";
-  gameOptionBlock.append(repeatButton);
-
-
-
-
-};
-// createNewGameAndRepeatButtons();
-
-function createOutputField(characterArray, _gameInformation) {
-  const divForOutput = document.createElement("div");
-  divForOutput.classList.add("output__block");
-  body.append(divForOutput);
-
-  const output = document.createElement("div");
-  output.classList.add("output");
-  divForOutput.append(output);
-
-  let numberOfCharacters;
-
-  if (_gameInformation.round === 1) {
-    numberOfCharacters = 2;
-  } else if (_gameInformation.round === 2) {
-    numberOfCharacters = 4;
-  } else if (_gameInformation.round === 3) {
-    numberOfCharacters = 6;
-  } else if (_gameInformation.round === 4) {
-    numberOfCharacters = 8;
-  } else if (_gameInformation.round === 5) {
-    numberOfCharacters = 10;
-  } else {
-    return;
-  }
-
-  const sequence = [];
-  for (let i = 0; i < numberOfCharacters; i++) {
-    const randomIndex = Math.floor(Math.random() * characterArray.length);
-    sequence.push(characterArray[randomIndex]);
-  }
-
-  let index = 0;
-  const interval = setInterval(() => {
-    if (index < sequence.length) {
-      output.innerText = sequence[index]; 
-      index++;
-    } else {
-      clearInterval(interval); 
-      setTimeout(() => (output.innerText = ""), 1000);
-    }
-  }, 1000);
-  return gameInformation.currentSequence = sequence;
-}
-// createOutputField(hardLevelArray, gameInformation);
-
-
-
-
-function createInputField() {
-  const divForInput = document.createElement("div");
-  divForInput.classList.add("input__block");
-  body.append(divForInput);
-
-  const input = document.createElement("div");
-  input.classList.add("input");
-  divForInput.append(input);
-}
-// createInputField();
-
-
-
-
-function createVirtualKeyboard(_gameInformation) {
-  const divForKeyboard = document.createElement("div");
-  divForKeyboard.classList.add("divForKeyboard");
-  body.append(divForKeyboard);
-
-  let characterArray;
-  if (_gameInformation.difficult === 'easy') {
-    characterArray = easyLevelArray;
-  } else if (_gameInformation.difficult === "medium") {
-    characterArray = mediumLevelArray;
-  } else if (_gameInformation.difficult === "hard") {
-    characterArray = hardLevelArray;
-  } else {
-    return
-  }  
-
-  for (let i = 0; i < characterArray.length; i++) {
-    const key = document.createElement("div");
-    key.classList.add("key");
-    key.innerText = characterArray[i];
-    divForKeyboard.append(key);
-  }
-  const keyBoard = document.querySelector(".divForKeyboard");
-  if (keyBoard) {
-    keyBoard.addEventListener("click", listenClick);
-  }
-}
-
-// createVirtualKeyboard(gameInformation);
-
-// console.log(keyBoard);
-
-
-
-function listenClick(event) {
-  let clickedButton = event.target;
-  if (clickedButton.classList.contains("key")) {
-    changeInput(clickedButton);
-  } else {
-    return;
-  }
-  clickedButton = "";
-}
-
-function changeInput(key) {
-  const input = document.querySelector(".input");
-  if (input) {
-      let inputValue = input.innerText;
-      let keyValue = key.innerText;
-      console.log(inputValue);
-      console.log(keyValue);
-
-      inputValue = inputValue + keyValue;
-      input.innerText = inputValue;
-  } else {
-    return
-  }
-
-  // if (input) {
-  // }
-}
-
 function renderLevelInformation(_gameInformation) {
   const levelInformation = document.createElement("div");
   levelInformation.classList.add("level-information");
@@ -296,5 +179,209 @@ function renderLevelInformation(_gameInformation) {
   levelInformation.append(currentRound);
 
 }
+
+function createNewGameAndRepeatButtons () {
+  const gameOptionBlock = document.createElement("div");
+  gameOptionBlock.classList.add("option");
+  body.append(gameOptionBlock);
+
+
+  const newGameButton = document.createElement("div");
+  newGameButton.classList.add("option__new-game");
+  newGameButton.innerText = 'New Game'
+  gameOptionBlock.append(newGameButton);
+  newGameButton.addEventListener('click', restartGame)
+
+  const repeatButton = document.createElement("div");
+  repeatButton.classList.add("option__repeat-sequence");
+  repeatButton.innerText = "Repeat Sequence";
+  gameOptionBlock.append(repeatButton);
+  repeatButton.addEventListener("click", repeatSequence);
+
+
+
+};
+
+function createOutputField(_gameInformation) {
+  const divForOutput = document.createElement("div");
+  divForOutput.classList.add("output__block");
+  body.append(divForOutput);
+
+  const output = document.createElement("div");
+  output.classList.add("output");
+  divForOutput.append(output);
+
+  let numberOfCharacters;
+
+  let characterArray;
+  if (_gameInformation.difficult === "easy") {
+    characterArray = easyLevelArray;
+  } else if (_gameInformation.difficult === "medium") {
+    characterArray = mediumLevelArray;
+  } else if (_gameInformation.difficult === "hard") {
+    characterArray = hardLevelArray;
+  } else {
+    return;
+  }
+  
+  if (_gameInformation.round === 1) {
+    numberOfCharacters = 2;
+  } else if (_gameInformation.round === 2) {
+    numberOfCharacters = 4;
+  } else if (_gameInformation.round === 3) {
+    numberOfCharacters = 6;
+  } else if (_gameInformation.round === 4) {
+    numberOfCharacters = 8;
+  } else if (_gameInformation.round === 5) {
+    numberOfCharacters = 10;
+  } else {
+    return;
+  }
+
+  const sequence = [];
+  for (let i = 0; i < numberOfCharacters; i++) {
+    const randomIndex = Math.floor(Math.random() * characterArray.length);
+    sequence.push(characterArray[randomIndex]);
+  }
+
+  let index = 0;
+  const interval = setInterval(() => {
+    if (index < sequence.length) {
+      output.innerText = sequence[index]; 
+      index++;
+    } else {
+      clearInterval(interval); 
+      setTimeout(() => (output.innerText = ""), 1000);
+    }
+  }, 1000);
+  console.log(sequence);
+  
+  return gameInformation.currentSequence = sequence;
+}
+
+
+
+function createInputField() {
+  const divForInput = document.createElement("div");
+  divForInput.classList.add("input__block");
+  body.append(divForInput);
+
+  const input = document.createElement("div");
+  input.classList.add("input");
+  divForInput.append(input);
+}
+
+
+
+
+
+function createVirtualKeyboard(_gameInformation) {
+  const divForKeyboard = document.createElement("div");
+  divForKeyboard.classList.add("divForKeyboard");
+  body.append(divForKeyboard);
+
+  let characterArray;
+  if (_gameInformation.difficult === 'easy') {
+    characterArray = easyLevelArray;
+  } else if (_gameInformation.difficult === "medium") {
+    characterArray = mediumLevelArray;
+  } else if (_gameInformation.difficult === "hard") {
+    characterArray = hardLevelArray;
+  } else {
+    return
+  }  
+
+  for (let i = 0; i < characterArray.length; i++) {
+    const key = document.createElement("div");
+    key.classList.add("key");
+    key.innerText = characterArray[i];
+    divForKeyboard.append(key);
+  }
+  const keyBoard = document.querySelector(".divForKeyboard");
+  if (keyBoard) {
+    keyBoard.addEventListener("click", listenClick);
+  }
+}
+function listenClick(event) {
+  let clickedButton = event.target;
+  if (clickedButton.classList.contains("key")) {
+    changeInput(clickedButton);
+  } else {
+    return;
+  }
+  clickedButton = "";
+}
+
+function changeInput(key) {
+  const input = document.querySelector(".input");
+  const inputBlock = document.querySelector(".input__block");
+  if (input) {
+    let inputValue = input.innerText;
+    let keyValue = key.innerText;
+
+    inputValue = inputValue + keyValue;
+    input.innerText = inputValue;
+
+
+    if (isPartialMatch(inputValue, gameInformation.currentSequence) === false) {
+      inputBlock.classList.add("input__block-error");
+      if (gameInformation.repeatSequence) {
+        input.innerText = "Incorrect sequence! Try again.";
+      } else {
+        input.innerText = "You lost! Restart the game.";
+      }
+      return;
+    }
+
+    inputBlock.classList.remove("input__block-error");
+
+      if (inputValue.length === gameInformation.currentSequence.length) {
+      gameInformation.round++;
+      if (gameInformation.round > 5) {
+        inputBlock.style.backgroundColor = "green";
+        input.innerText = "Congratulations! You completed all rounds.";
+        gameInformation.repeatSequence = false;
+      } else {
+        inputBlock.style.backgroundColor = "green";
+        input.innerText = "You won this round";
+        gameInformation.repeatSequence = false;
+        replaceRepeatWithNextButton();
+      }
+    }
+  }
+
+}
+
+function isPartialMatch(inputValue, currentSequence) {
+  for (let i = 0; i < inputValue.length; i++) {
+    if (inputValue[i] !== currentSequence[i].toString()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function replaceRepeatWithNextButton() {
+  const repeatButton = document.querySelector(".option__repeat-sequence");
+  if (repeatButton) {
+    repeatButton.innerText = "Next Round";
+    repeatButton.classList.remove("option__repeat-sequence");
+    repeatButton.classList.add("option__next-round");
+    repeatButton.removeEventListener("click", repeatSequence);
+    repeatButton.addEventListener("click", () => {
+      renderPage();
+    });
+  }
+}
+
+
+
+
+
+
+
+
+
+
 
 
