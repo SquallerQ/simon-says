@@ -12,12 +12,97 @@ const gameInformation = {
 };
 
 
+function startScreen () {
+  body.innerHTML = ''
+  changeDifficult(gameInformation);
+  createVirtualKeyboard(gameInformation);
+  startGame(gameInformation);
+}
 
-function renderPage() {
-  renderLevelInformation(gameInformation);
+startScreen()
+
+
+function changeDifficultHandler () {
+  const difficultMenu = document.querySelector(".start-screen__difficult-items");
+  if (difficultMenu) {
+    difficultMenu.addEventListener("click", function (event) {
+      const clickedItem = event.target;
+
+      if (clickedItem.classList.contains("start-screen__difficult-item")) {
+      const difficultInformation = clickedItem.innerText.toLowerCase();
+      gameInformation.difficult = difficultInformation;
+      startScreen();
+      }
+    });
+  }
+}
+
+function changeDifficult(_gameInformation) {
+  const startScreenBlock = document.createElement("div");
+  startScreenBlock.classList.add("start-screen__difficult");
+  body.append(startScreenBlock);
+
+  const levelDifficultBlock = document.createElement("div");
+  levelDifficultBlock.classList.add("start-screen__difficult-items");
+  startScreenBlock.append(levelDifficultBlock);
+
+  const levelDifficultEasy = document.createElement("div");
+  const levelDifficultMedium = document.createElement("div");
+  const levelDifficultHard = document.createElement("div");
+
+  levelDifficultEasy.innerText = "Easy";
+  levelDifficultMedium.innerText = "Medium";
+  levelDifficultHard.innerText = "Hard";
+
+  levelDifficultEasy.classList.add("start-screen__difficult-item");
+  levelDifficultMedium.classList.add("start-screen__difficult-item");
+  levelDifficultHard.classList.add("start-screen__difficult-item");
+
+  levelDifficultBlock.append(levelDifficultEasy);
+  levelDifficultBlock.append(levelDifficultMedium);
+  levelDifficultBlock.append(levelDifficultHard);
+
+  levelDifficultBlock.addEventListener('click', changeDifficultHandler)
+
+  levelDifficultEasy.classList.remove('start-screen__difficult-item--active')
+  levelDifficultMedium.classList.remove('start-screen__difficult-item--active')
+  levelDifficultHard.classList.remove('start-screen__difficult-item--active')
+
+  if (_gameInformation.difficult === "easy") {
+    levelDifficultEasy.classList.add("start-screen__difficult-item--active");
+  } else if (_gameInformation.difficult === "medium") {
+    levelDifficultMedium.classList.add("start-screen__difficult-item--active");
+  } else if (_gameInformation.difficult === "hard") {
+    levelDifficultHard.classList.add("start-screen__difficult-item--active");
+  }
+  changeDifficultHandler();
+}
+
+function startGame(_gameInformation) {
+
+  const startButtonBlock = document.createElement("div");
+  startButtonBlock.classList.add("start-button");
+  startButtonBlock.innerHTML = 'Start Game';
+  body.append(startButtonBlock);
+
+  startButtonBlock.addEventListener("click", () => {
+    renderPage();
+  });
 
 }
-renderPage()
+
+
+
+function renderPage() {
+  body.innerHTML = '';
+  renderLevelInformation(gameInformation);
+  createNewGameAndRepeatButtons();
+  createOutputField(hardLevelArray, gameInformation);
+  createInputField();
+  createVirtualKeyboard(gameInformation);
+
+}
+// renderPage()
 
 function createNewGameAndRepeatButtons () {
   const gameOptionBlock = document.createElement("div");
@@ -39,7 +124,7 @@ function createNewGameAndRepeatButtons () {
 
 
 };
-createNewGameAndRepeatButtons();
+// createNewGameAndRepeatButtons();
 
 function createOutputField(characterArray, _gameInformation) {
   const divForOutput = document.createElement("div");
@@ -84,7 +169,7 @@ function createOutputField(characterArray, _gameInformation) {
   }, 1000);
   return gameInformation.currentSequence = sequence;
 }
-createOutputField(hardLevelArray, gameInformation);
+// createOutputField(hardLevelArray, gameInformation);
 
 
 
@@ -98,15 +183,26 @@ function createInputField() {
   input.classList.add("input");
   divForInput.append(input);
 }
-createInputField();
+// createInputField();
 
 
 
 
-function createVirtualKeyboard(characterArray) {
+function createVirtualKeyboard(_gameInformation) {
   const divForKeyboard = document.createElement("div");
   divForKeyboard.classList.add("divForKeyboard");
   body.append(divForKeyboard);
+
+  let characterArray;
+  if (_gameInformation.difficult === 'easy') {
+    characterArray = easyLevelArray;
+  } else if (_gameInformation.difficult === "medium") {
+    characterArray = mediumLevelArray;
+  } else if (_gameInformation.difficult === "hard") {
+    characterArray = hardLevelArray;
+  } else {
+    return
+  }  
 
   for (let i = 0; i < characterArray.length; i++) {
     const key = document.createElement("div");
@@ -114,16 +210,17 @@ function createVirtualKeyboard(characterArray) {
     key.innerText = characterArray[i];
     divForKeyboard.append(key);
   }
+  const keyBoard = document.querySelector(".divForKeyboard");
+  if (keyBoard) {
+    keyBoard.addEventListener("click", listenClick);
+  }
 }
 
-createVirtualKeyboard(hardLevelArray);
+// createVirtualKeyboard(gameInformation);
 
-const keyBoard = document.querySelector(".divForKeyboard");
 // console.log(keyBoard);
 
-if (keyBoard) {
-  keyBoard.addEventListener("click", listenClick);
-}
+
 
 function listenClick(event) {
   let clickedButton = event.target;
@@ -137,15 +234,20 @@ function listenClick(event) {
 
 function changeInput(key) {
   const input = document.querySelector(".input");
-  let inputValue = input.innerText;
-  let keyValue = key.innerText;
-  console.log(inputValue);
-  console.log(keyValue);
-
-  inputValue = inputValue + keyValue;
   if (input) {
-    input.innerText = inputValue;
+      let inputValue = input.innerText;
+      let keyValue = key.innerText;
+      console.log(inputValue);
+      console.log(keyValue);
+
+      inputValue = inputValue + keyValue;
+      input.innerText = inputValue;
+  } else {
+    return
   }
+
+  // if (input) {
+  // }
 }
 
 function renderLevelInformation(_gameInformation) {

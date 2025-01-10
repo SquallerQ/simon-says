@@ -2,6 +2,49 @@ body {
   padding: 0;
   margin: 0;
 }
+.start-screen__difficult {
+
+  
+}
+.start-screen__difficult-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px;
+
+  gap: 20px;
+}
+.start-screen__difficult-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px 15px;
+  width: 200px;
+
+  background-color: #17ff20;
+  cursor: pointer;
+}
+.start-screen__difficult-item--active {
+  background-color: blue;
+}
+
+.start-button {
+  display: flex; 
+  justify-content: center; 
+  margin: 0 auto;
+  
+  padding: 20px 15px;
+  width: 200px;
+  
+  background-color: #c33636;
+  cursor: pointer;
+}
+
+
+
 
 .level-information {
   display: flex;
@@ -19,7 +62,7 @@ body {
   font-size: 18px;
   padding-left: 12px;
   position: relative; 
-  cursor: pointer;
+  /* cursor: pointer; */
 }
 .level-information__difficult-item::before {
   position: absolute;
