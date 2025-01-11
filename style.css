@@ -155,3 +155,9 @@ body {
   pointer-events: none;
   opacity: 0.5;
 }
+.key.highlight {
+  background-color: yellow; 
+}
+.key--highlighted {
+  background-color: fuchsia; 
+}

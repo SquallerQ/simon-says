@@ -107,6 +107,7 @@ function repeatSequence () {
 
     const sequence = gameInformation.currentSequence;
     displaySequence(sequence);
+    document.addEventListener("keydown", listenPhysicalKeyboard);
   } else {
     return
   }
@@ -119,11 +120,19 @@ function displaySequence(sequence) {
   const output = document.querySelector(".output");
   let index = 0;
 
+  const highlightDuration = 700;
   disableInput();
 
   const interval = setInterval(() => {
     if (index < sequence.length) {
       output.innerText = sequence[index];
+      const key = document.querySelector(`.key[data-key="${sequence[index]}"]`);
+      if (key) {
+        key.classList.add("highlight");
+        setTimeout(() => {
+          key.classList.remove("highlight");
+        }, highlightDuration);
+      }
       index++;
     } else {
       clearInterval(interval);
@@ -346,6 +355,7 @@ function listenPhysicalKeyboard(event) {
 
   if (characterArray.includes(keyPressed) || characterArray.includes(parseInt(keyPressed))) {
     const key = document.querySelector(`.key[data-key="${keyPressed}"]`);
+    highlightKey(key);
     changeInput(key);
   }
 }
@@ -354,11 +364,22 @@ function listenClick(event) {
   if (!isInputAllowed) return;
   let clickedButton = event.target;
   if (clickedButton.classList.contains("key")) {
+    highlightKey(clickedButton);
     changeInput(clickedButton);
   } else {
     return;
   }
   clickedButton = "";
+}
+function highlightKey(key) {
+  const currentlyHighlightedKey = document.querySelector(".key--highlighted");
+  if (currentlyHighlightedKey) {
+    currentlyHighlightedKey.classList.remove("key--highlighted");
+  }
+  key.classList.add("key--highlighted");
+  setTimeout(() => {
+    key.classList.remove("key--highlighted");
+  }, 500);
 }
 
 function changeInput(key) {
@@ -379,6 +400,8 @@ function changeInput(key) {
       } else {
         input.innerText = "You lost! Restart the game.";
       }
+      toggleVirtualKeyboard(false);
+      document.removeEventListener("keydown", listenPhysicalKeyboard);
       return;
     }
 
@@ -390,9 +413,13 @@ function changeInput(key) {
         inputBlock.style.backgroundColor = "green";
         input.innerText = "Congratulations! You completed all rounds.";
         gameInformation.repeatSequence = false;
+        toggleVirtualKeyboard(false);
+        document.removeEventListener("keydown", listenPhysicalKeyboard);
       } else {
         inputBlock.style.backgroundColor = "green";
         input.innerText = "You won this round";
+        toggleVirtualKeyboard(false);
+        document.removeEventListener("keydown", listenPhysicalKeyboard);
         gameInformation.repeatSequence = false;
         replaceRepeatWithNextButton();
       }
