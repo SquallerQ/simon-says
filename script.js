@@ -103,6 +103,7 @@ function startGame(_gameInformation) {
 
 function restartGame() {
   document.removeEventListener("keydown", listenPhysicalKeyboard);
+  document.removeEventListener("keyup", listenPhysicalKeyboard);
   gameInformation.round = 1;
   gameInformation.currentSequence = "";
   gameInformation.repeatSequence = true;
@@ -117,6 +118,7 @@ function repeatSequence () {
     const sequence = gameInformation.currentSequence;
     displaySequence(sequence);
     document.addEventListener("keydown", listenPhysicalKeyboard);
+    document.addEventListener("keyup", listenPhysicalKeyboard);
 
     const repeatButton = document.querySelector(".option__repeat-sequence");
     if (repeatButton) {
@@ -206,6 +208,7 @@ function renderPage() {
   disableInput();
 
   document.addEventListener("keydown", listenPhysicalKeyboard);
+  document.addEventListener("keyup", listenPhysicalKeyboard);
   gameInformation.repeatSequence = true;
   
 }
@@ -370,12 +373,16 @@ function createVirtualKeyboard(_gameInformation) {
     keyBoard.addEventListener("click", listenClick);
   }
 }
+
+let pressedKeysArray = [];
+let firstKeyPressed = null; 
+
 function listenPhysicalKeyboard(event) {
   if (!isInputAllowed) return;
+
   const keyPressed = event.key.toLocaleLowerCase();
-  
-  console.log(keyPressed);
   let characterArray;
+
   if (gameInformation.difficult === "easy") {
     characterArray = easyLevelArray;
   } else if (gameInformation.difficult === "medium") {
@@ -384,18 +391,34 @@ function listenPhysicalKeyboard(event) {
     characterArray = hardLevelArray;
   } else {
     return;
-  }  
-
-
-  if (characterArray.includes(keyPressed) || characterArray.includes(parseInt(keyPressed))) {
-    const key = document.querySelector(`.key[data-key="${keyPressed}"]`);
-    highlightKey(key);
-    changeInput(key);
   }
+  if (event.type === "keydown") {
+    if (!pressedKeysArray.includes(keyPressed)) {
+      if (firstKeyPressed === null) {
+          firstKeyPressed = keyPressed;
+          }
+          pressedKeysArray.push(keyPressed);
+     }   
+   } else if (event.type === "keyup") {
+    const keyIndex = pressedKeysArray.indexOf(keyPressed);
+    if (keyIndex > -1) {
+      pressedKeysArray.splice(keyIndex, 1);
+    }
+    if (pressedKeysArray.length === 0) {
+      if (firstKeyPressed && (characterArray.includes(firstKeyPressed) || characterArray.includes(parseInt(firstKeyPressed)))) {
+        const key = document.querySelector(`.key[data-key="${firstKeyPressed}"]`);
+          if (key) {
+            highlightKey(key);
+            changeInput(key);
+            }
+          }
+        firstKeyPressed = null; 
+      }
+   }
 }
 
 function listenClick(event) {
-  if (!isInputAllowed) return;
+   if (!isInputAllowed || pressedKeysArray.length > 0) return;
   let clickedButton = event.target;
   if (clickedButton.classList.contains("key")) {
     highlightKey(clickedButton);
@@ -439,6 +462,7 @@ function changeInput(key) {
 
       toggleVirtualKeyboard(false);
       document.removeEventListener("keydown", listenPhysicalKeyboard);
+      document.removeEventListener("keyup", listenPhysicalKeyboard);
       return;
     }
 
@@ -453,12 +477,14 @@ function changeInput(key) {
         gameInformation.repeatSequence = false;
         toggleVirtualKeyboard(false);
         document.removeEventListener("keydown", listenPhysicalKeyboard);
+        document.removeEventListener("keyup", listenPhysicalKeyboard);
       } else {
         inputBlock.style.backgroundColor = "green";
         input.innerText = "You won this round";
         playSound(soundRoundWin);
         toggleVirtualKeyboard(false);
         document.removeEventListener("keydown", listenPhysicalKeyboard);
+        document.removeEventListener("keyup", listenPhysicalKeyboard);
         gameInformation.repeatSequence = false;
         replaceRepeatWithNextButton();
       }
