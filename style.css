@@ -92,9 +92,10 @@ body {
 }
 .option__new-game {
   /* background-color: green; */
+  cursor: pointer;
 }
 .option__repeat-sequence {
-
+  cursor: pointer;
 }
 
 .output__block {

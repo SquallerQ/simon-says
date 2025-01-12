@@ -12,10 +12,19 @@ const gameInformation = {
   repeatSequence: true
 };
 
+const soundRoundWin = new Audio("media/round-win.mp3");
+const soundGameWin = new Audio("media/game-win.mp3");
+const soundError = new Audio("media/error.mp3");
+const soundLose = new Audio("media/lose-game.mp3");
+function playSound(sound) {
+  sound.play();
+}
 
 function startScreen () {
   isInputAllowed = false;
-  body.innerHTML = ''
+  while (body.firstChild) {
+    body.removeChild(body.firstChild);
+  }
   changeDifficult(gameInformation);
   createVirtualKeyboard(gameInformation);
   startGame(gameInformation);
@@ -83,7 +92,7 @@ function startGame(_gameInformation) {
 
   const startButtonBlock = document.createElement("div");
   startButtonBlock.classList.add("start-button");
-  startButtonBlock.innerHTML = 'Start Game';
+  startButtonBlock.innerText = 'Start Game';
   body.append(startButtonBlock);
 
   startButtonBlock.addEventListener("click", () => {
@@ -101,13 +110,22 @@ function restartGame() {
 };
 
 function repeatSequence () {  
-  if (gameInformation.repeatSequence === true) {
+  if (gameInformation.repeatSequence === true) {   
     const input = document.querySelector(".input");
-    input.innerHTML = ''
+    input.innerText = ''
 
     const sequence = gameInformation.currentSequence;
     displaySequence(sequence);
     document.addEventListener("keydown", listenPhysicalKeyboard);
+
+    const repeatButton = document.querySelector(".option__repeat-sequence");
+    if (repeatButton) {
+      repeatButton.removeEventListener("click", repeatSequence);
+    }  
+    const newGameButton = document.querySelector(".option__new-game");
+    if (newGameButton) {
+      newGameButton.removeEventListener("click", restartGame);
+    }  
   } else {
     return
   }
@@ -122,6 +140,11 @@ function displaySequence(sequence) {
 
   const highlightDuration = 700;
   disableInput();
+
+    const newGameButton = document.querySelector(".option__new-game");
+    const repeatButton = document.querySelector(".option__repeat-sequence");
+    if (newGameButton) newGameButton.classList.add("disabled");
+    if (repeatButton) repeatButton.classList.add("disabled");
 
   const interval = setInterval(() => {
     if (index < sequence.length) {
@@ -139,6 +162,15 @@ function displaySequence(sequence) {
       setTimeout(() => {
         output.innerText = "";
         enableInput();
+
+        if (newGameButton) {
+          newGameButton.classList.remove("disabled");
+          newGameButton.addEventListener('click', restartGame)
+        } 
+        if (repeatButton) {
+          repeatButton.classList.remove("disabled");
+          repeatButton.addEventListener("click", repeatSequence);
+        }
       }, 1000);
     }
   }, 1000);
@@ -163,7 +195,9 @@ function toggleVirtualKeyboard(status) {
   });
 }
 function renderPage() {
-  body.innerHTML = '';
+  while (body.firstChild) {
+    body.removeChild(body.firstChild);
+  }
   renderLevelInformation(gameInformation);
   createNewGameAndRepeatButtons();
   createOutputField(gameInformation);
@@ -232,13 +266,13 @@ function createNewGameAndRepeatButtons () {
   newGameButton.classList.add("option__new-game");
   newGameButton.innerText = 'New Game'
   gameOptionBlock.append(newGameButton);
-  newGameButton.addEventListener('click', restartGame)
+  // newGameButton.addEventListener('click', restartGame)
 
   const repeatButton = document.createElement("div");
   repeatButton.classList.add("option__repeat-sequence");
   repeatButton.innerText = "Repeat Sequence";
   gameOptionBlock.append(repeatButton);
-  repeatButton.addEventListener("click", repeatSequence);
+  // repeatButton.addEventListener("click", repeatSequence);
 
 
 
@@ -397,9 +431,12 @@ function changeInput(key) {
       inputBlock.classList.add("input__block-error");
       if (gameInformation.repeatSequence) {
         input.innerText = "Incorrect sequence! Try again.";
+        playSound(soundError);
       } else {
         input.innerText = "You lost! Restart the game.";
+        playSound(soundLose);
       }
+
       toggleVirtualKeyboard(false);
       document.removeEventListener("keydown", listenPhysicalKeyboard);
       return;
@@ -412,12 +449,14 @@ function changeInput(key) {
       if (gameInformation.round > 5) {
         inputBlock.style.backgroundColor = "green";
         input.innerText = "Congratulations! You completed all rounds.";
+        playSound(soundGameWin);
         gameInformation.repeatSequence = false;
         toggleVirtualKeyboard(false);
         document.removeEventListener("keydown", listenPhysicalKeyboard);
       } else {
         inputBlock.style.backgroundColor = "green";
         input.innerText = "You won this round";
+        playSound(soundRoundWin);
         toggleVirtualKeyboard(false);
         document.removeEventListener("keydown", listenPhysicalKeyboard);
         gameInformation.repeatSequence = false;
