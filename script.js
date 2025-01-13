@@ -26,8 +26,9 @@ function startScreen () {
     body.removeChild(body.firstChild);
   }
   changeDifficult(gameInformation);
+  startGame(gameInformation); 
   createVirtualKeyboard(gameInformation);
-  startGame(gameInformation);
+  toggleVirtualKeyboard(false);
 }
 startScreen()
 
@@ -39,7 +40,7 @@ function changeDifficultHandler () {
       const clickedItem = event.target;
 
       if (clickedItem.classList.contains("start-screen__difficult-item")) {
-      const difficultInformation = clickedItem.innerText.toLowerCase();
+      const difficultInformation = clickedItem.textContent.toLowerCase();
       gameInformation.difficult = difficultInformation;
       startScreen();
       }
@@ -60,9 +61,9 @@ function changeDifficult(_gameInformation) {
   const levelDifficultMedium = document.createElement("div");
   const levelDifficultHard = document.createElement("div");
 
-  levelDifficultEasy.innerText = "Easy";
-  levelDifficultMedium.innerText = "Medium";
-  levelDifficultHard.innerText = "Hard";
+  levelDifficultEasy.textContent = "Easy";
+  levelDifficultMedium.textContent = "Medium";
+  levelDifficultHard.textContent = "Hard";
 
   levelDifficultEasy.classList.add("start-screen__difficult-item");
   levelDifficultMedium.classList.add("start-screen__difficult-item");
@@ -92,7 +93,7 @@ function startGame(_gameInformation) {
 
   const startButtonBlock = document.createElement("div");
   startButtonBlock.classList.add("start-button");
-  startButtonBlock.innerText = 'Start Game';
+  startButtonBlock.textContent = "Start Game";
   body.append(startButtonBlock);
 
   startButtonBlock.addEventListener("click", () => {
@@ -113,7 +114,7 @@ function restartGame() {
 function repeatSequence () {  
   if (gameInformation.repeatSequence === true) {   
     const input = document.querySelector(".input");
-    input.innerText = ''
+    input.textContent = ''
 
     const sequence = gameInformation.currentSequence;
     displaySequence(sequence);
@@ -150,7 +151,7 @@ function displaySequence(sequence) {
 
   const interval = setInterval(() => {
     if (index < sequence.length) {
-      output.innerText = sequence[index];
+      output.textContent = sequence[index];
       const key = document.querySelector(`.key[data-key="${sequence[index]}"]`);
       if (key) {
         key.classList.add("highlight");
@@ -162,17 +163,21 @@ function displaySequence(sequence) {
     } else {
       clearInterval(interval);
       setTimeout(() => {
-        output.innerText = "";
+        output.textContent = "";
         enableInput();
 
+        if (gameInformation.repeatSequence === true) {
+          if (repeatButton) {
+            repeatButton.classList.remove("disabled");
+            repeatButton.addEventListener("click", repeatSequence);
+          }
+        }
+        
         if (newGameButton) {
           newGameButton.classList.remove("disabled");
           newGameButton.addEventListener('click', restartGame)
         } 
-        if (repeatButton) {
-          repeatButton.classList.remove("disabled");
-          repeatButton.addEventListener("click", repeatSequence);
-        }
+
       }, 1000);
     }
   }, 1000);
@@ -226,9 +231,9 @@ function renderLevelInformation(_gameInformation) {
   const levelDifficultMedium = document.createElement("div");
   const levelDifficultHard = document.createElement("div");
 
-  levelDifficultEasy.innerText = "Easy";
-  levelDifficultMedium.innerText = "Medium";
-  levelDifficultHard.innerText = "Hard";
+  levelDifficultEasy.textContent = "Easy";
+  levelDifficultMedium.textContent = "Medium";
+  levelDifficultHard.textContent = "Hard";
 
   levelDifficultEasy.classList.add("level-information__difficult-item");
   levelDifficultMedium.classList.add("level-information__difficult-item");
@@ -254,7 +259,7 @@ function renderLevelInformation(_gameInformation) {
 
   const currentRound = document.createElement("div");
   currentRound.classList.add("level-information__round");
-  currentRound.innerText = `Current round: ${gameInformation.round}/5`;
+  currentRound.textContent = `Current round: ${gameInformation.round}/5`;
   levelInformation.append(currentRound);
 
 }
@@ -267,13 +272,13 @@ function createNewGameAndRepeatButtons () {
 
   const newGameButton = document.createElement("div");
   newGameButton.classList.add("option__new-game");
-  newGameButton.innerText = 'New Game'
+  newGameButton.textContent = "New Game";
   gameOptionBlock.append(newGameButton);
   // newGameButton.addEventListener('click', restartGame)
 
   const repeatButton = document.createElement("div");
   repeatButton.classList.add("option__repeat-sequence");
-  repeatButton.innerText = "Repeat Sequence";
+  repeatButton.textContent = "Repeat Sequence";
   gameOptionBlock.append(repeatButton);
   // repeatButton.addEventListener("click", repeatSequence);
 
@@ -364,7 +369,7 @@ function createVirtualKeyboard(_gameInformation) {
   for (let i = 0; i < characterArray.length; i++) {
     const key = document.createElement("div");
     key.classList.add("key");
-    key.innerText = characterArray[i];
+    key.textContent = characterArray[i];
     key.setAttribute('data-key', characterArray[i].toString().toLocaleLowerCase())
     divForKeyboard.append(key);
   }
@@ -442,21 +447,23 @@ function highlightKey(key) {
 function changeInput(key) {
   const input = document.querySelector(".input");
   const inputBlock = document.querySelector(".input__block");
+  const repeatButton = document.querySelector(".option__repeat-sequence");
+  
   if (input) {
-    let inputValue = input.innerText;
-    let keyValue = key.innerText;
+    let inputValue = input.textContent;
+    let keyValue = key.textContent;
 
     inputValue = inputValue + keyValue;
-    input.innerText = inputValue;
+    input.textContent = inputValue;
 
 
     if (isPartialMatch(inputValue, gameInformation.currentSequence) === false) {
       inputBlock.classList.add("input__block-error");
       if (gameInformation.repeatSequence) {
-        input.innerText = "Incorrect sequence! Try again.";
+        input.textContent = "Incorrect sequence! Try again.";
         playSound(soundError);
       } else {
-        input.innerText = "You lost! Restart the game.";
+        input.textContent = "You lost! Restart the game.";
         playSound(soundLose);
       }
 
@@ -472,7 +479,8 @@ function changeInput(key) {
       gameInformation.round++;
       if (gameInformation.round > 5) {
         inputBlock.style.backgroundColor = "green";
-        input.innerText = "Congratulations! You completed all rounds.";
+        input.textContent = "Congratulations! You completed all rounds.";
+        if (repeatButton) repeatButton.classList.add("disabled");
         playSound(soundGameWin);
         gameInformation.repeatSequence = false;
         toggleVirtualKeyboard(false);
@@ -480,7 +488,7 @@ function changeInput(key) {
         document.removeEventListener("keyup", listenPhysicalKeyboard);
       } else {
         inputBlock.style.backgroundColor = "green";
-        input.innerText = "You won this round";
+        input.textContent = "You won this round";
         playSound(soundRoundWin);
         toggleVirtualKeyboard(false);
         document.removeEventListener("keydown", listenPhysicalKeyboard);
@@ -505,8 +513,9 @@ function isPartialMatch(inputValue, currentSequence) {
 function replaceRepeatWithNextButton() {
   const repeatButton = document.querySelector(".option__repeat-sequence");
   if (repeatButton) {
-    repeatButton.innerText = "Next Round";
+    repeatButton.textContent = "Next Round";
     repeatButton.classList.remove("option__repeat-sequence");
+    repeatButton.classList.remove("disabled");
     repeatButton.classList.add("option__next-round");
     repeatButton.removeEventListener("click", repeatSequence);
     repeatButton.addEventListener("click", () => {
@@ -514,14 +523,6 @@ function replaceRepeatWithNextButton() {
     });
   }
 }
-
-
-
-
-
-
-
-
 
 
 
