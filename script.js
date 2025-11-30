@@ -379,6 +379,10 @@ function listenPhysicalKeyboard(event) {
   if (!isInputAllowed) return;
 
   const keyPressed = event.key.toLocaleLowerCase();
+
+  const ignoredKeys = ['shift', 'control', 'alt', 'meta', 'capslock', 'tab', 'escape', 'enter', 'backspace'];
+  if (ignoredKeys.includes(keyPressed)) return;
+  
   let characterArray;
 
   if (gameInformation.difficult === 'easy') {
