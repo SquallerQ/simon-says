@@ -26,7 +26,7 @@ body {
   overflow: hidden;
 }
 body::before {
-    content: '';
+  content: '';
   position: absolute;
   inset: 0;
   background: url('media/bg.jpeg') center / cover no-repeat;
@@ -363,37 +363,25 @@ body::before {
 }
 
 @media (max-width: 800px) {
+  body {
+    padding: 0 15px;
+  }
+
   .game-container {
     padding: 15px;
-    min-height: auto;
   }
 
   .start-screen__difficult-item {
-    width: 85%;
-    font-size: 14px;
     padding: 12px;
   }
 
   .start-button {
-    width: 85%;
-    max-width: 220px;
     font-size: 16px;
     padding: 16px 0;
   }
 
-  .level-information {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 10px;
-    gap: 15px;
-  }
-
-  .input__block {
-    height: 70px;
-  }
-
   .input {
-    font-size: 20px;
+    font-size: 30px;
   }
 
   .divForKeyboard {
@@ -404,22 +392,40 @@ body::before {
   .divForKeyboard .key {
     width: 45px;
     height: 45px;
-    font-size: 14px;
   }
 }
 
 @media (max-width: 500px) {
+  body {
+    align-items: flex-start;
+    padding: 0;
+  }
+  
+  .game-container {
+    border-radius: 0;
+  }
+
   .start-screen__difficult-item {
-    width: 90%;
     font-size: 12px;
     padding: 10px;
   }
 
   .start-button {
-    width: 90%;
-    max-width: 180px;
     font-size: 14px;
     padding: 14px 0;
+  }
+
+  .level-information {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    gap: 15px;
+  }
+
+  .option {
+    flex-direction: column;
+    align-items: inherit;
+    text-align: center;
   }
 
   .divForKeyboard {
@@ -431,10 +437,5 @@ body::before {
     width: 40px;
     height: 40px;
     font-size: 12px;
-  }
-
-  .option {
-    flex-direction: column;
-    gap: 8px;
   }
 }
