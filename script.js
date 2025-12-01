@@ -449,6 +449,9 @@ function changeInput(key) {
   const repeatButton = document.querySelector('.option__repeat-sequence');
 
   if (input) {
+    inputBlock.classList.remove('input__block-win', 'input__block-gamewin');
+    input.classList.remove('input-win-text');
+
     let inputValue = input.textContent;
     let keyValue = key.textContent;
 
@@ -476,24 +479,25 @@ function changeInput(key) {
     if (inputValue.length === gameInformation.currentSequence.length) {
       gameInformation.round++;
       if (gameInformation.round > 5) {
-        inputBlock.style.backgroundColor = 'green';
+        inputBlock.classList.add('input__block-gamewin');
+        input.classList.add('input-win-text');
         input.textContent = 'Congratulations! You completed all rounds.';
         if (repeatButton) repeatButton.classList.add('disabled');
         playSound(soundGameWin);
         gameInformation.repeatSequence = false;
         toggleVirtualKeyboard(false);
-        document.removeEventListener('keydown', listenPhysicalKeyboard);
-        document.removeEventListener('keyup', listenPhysicalKeyboard);
       } else {
-        inputBlock.style.backgroundColor = 'green';
+        inputBlock.classList.add('input__block-win');
+        input.classList.add('input-win-text');
+
         input.textContent = 'You won this round';
         playSound(soundRoundWin);
         toggleVirtualKeyboard(false);
-        document.removeEventListener('keydown', listenPhysicalKeyboard);
-        document.removeEventListener('keyup', listenPhysicalKeyboard);
         gameInformation.repeatSequence = false;
         replaceRepeatWithNextButton();
       }
+      document.removeEventListener('keydown', listenPhysicalKeyboard);
+      document.removeEventListener('keyup', listenPhysicalKeyboard);
     }
   }
 }
